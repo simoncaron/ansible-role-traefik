@@ -41,6 +41,9 @@ All variables which can be overridden are stored in [defaults/main.yml](defaults
 | `traefik_cloudflare_email` | "dummy@yummi.com" | add cloudflare mail address |
 | `traefik_config_flags_extra` | {} | Set additional startup params in systemd unit |
 | `traefik_config` | {} | traefik config file entries |
+| `traefik_cloudflare_enable` | false | enable cloudflare dns challange |
+| `traefik_cloudflare_email` | "dummy@yummi.com" | cloudflare email |
+| `traefik_cloudflare_api_key` | "dummy" | cloudflare api key |
 
 ## Example
 

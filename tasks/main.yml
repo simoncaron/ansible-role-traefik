@@ -32,6 +32,16 @@
   become: true
   tags: traefik
 
+- name: create acme directorie
+  file:
+    path: "{{ traefik_config_dir }}/acme"
+    state: directory
+    owner: "{{ traefik_system_user }}"
+    group: "{{ traefik_system_group }}"
+    mode: 0700
+  become: true
+  tags: traefik
+
 - name: create log directorie
   file:
     path: "{{ traefik_log_dir }}"
@@ -92,7 +102,6 @@
   unarchive:
     src: "/tmp/traefik-{{ traefik_version }}.linux-{{ go_arch }}.tar.gz"
     dest: "/tmp"
-    creates: "/tmp/traefik-{{ traefik_version }}.linux-{{ go_arch }}/traefik"
   delegate_to: localhost
   check_mode: false
   become: true
@@ -101,7 +110,7 @@
   
 - name: propagate binaries
   copy:
-    src: "/tmp/traefik-{{ traefik_version }}.linux-{{ go_arch }}/traefik"
+    src: "/tmp/traefik"
     dest: "{{ traefik_binary_install_dir }}/traefik"
     mode: 0755
     owner: root
@@ -113,7 +122,7 @@
 
 - name: configure
   template:
-    src: "traefik.yml.j2"
+    src: "config.yml.j2"
     dest: "{{ traefik_config_dir }}/config.yml"
     force: true
     owner: "{{ traefik_system_user }}"
@@ -125,12 +134,22 @@
     - traefik
     - traefik_config
 
+- name: touch acme.json file
+  file:
+    path: "{{ traefik_config_dir }}/acme/acme.json"
+    state: touch
+    owner: "{{ traefik_system_user }}"
+    group: "{{ traefik_system_group }}"
+    mode: 0600
+  become: true
+  tags: traefik
+
 - name: copy defined custom rules *.rule from files folder
   copy:
     src: "{{ item }}"
     dest: "{{ traefik_config_dir }}/rules/"
     owner: "root"
-    mode: 0600
+    mode: 0644
   with_fileglob: "*.yml"
   become: true
 

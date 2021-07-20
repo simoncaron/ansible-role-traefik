@@ -1,5 +1,5 @@
 {{ ansible_managed | comment }}
 
 {% if traefik_config | length %}
-  {{ traefik_config | to_nice_yaml(sort_keys=False) | indent(2, False) }}
+{{ traefik_config | to_nice_yaml(sort_keys=False) }}
 {% endif %}

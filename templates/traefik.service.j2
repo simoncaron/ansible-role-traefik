@@ -5,6 +5,14 @@ Documentation=https://github.com/traefik
 After=network-online.target
 
 [Service]
+{% if traefik_cloudflare_enable %}
+{%   if traefik_cloudflare_email | length > 0 %}
+Environment="CF_API_EMAIL={{ traefik_cloudflare_email }}"
+{%   endif %}
+{%   if traefik_cloudflare_email | length > 0 %}
+Environment="CF_API_KEY={{ traefik_cloudflare_api_key }}"
+{%   endif %}
+{% endif %}
 Type=simple
 User={{ traefik_system_user }}
 Group={{ traefik_system_group }}
@@ -23,9 +31,6 @@ ExecStart={{ traefik_binary_install_dir }}/traefik \
 
 LimitNOFILE={{ traefik_limit_nofile | default('8192') }}
 LimitNOFILE=8192
-PrivateDevices=true
-ProtectHome=true
-ProtectSystem=full
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
