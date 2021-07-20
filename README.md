@@ -14,6 +14,8 @@
 
 Deploy [Traefik](https://github.com/traefik/traefik) Webserver.
 
+You can define a custom Rule with `<name>.yml` in files folder. The role copy this to the rules folder on server. I have added one example for unifi controler in unifi.yml
+
 ## Requirements
 
 - Ansible >= 2.5 (It might work on previous versions, but we cannot guarantee it)
@@ -35,6 +37,8 @@ All variables which can be overridden are stored in [defaults/main.yml](defaults
 | `traefik_log_to_file` | true | create logfiles in `traefik_log_dir` |
 | `traefik_log_level` | warn | Set loglevel |
 | `traefik_log_format` | json | Set logformat |
+| `traefik_default_domain` | "{{ ansible_domain }}" | Set default domain |
+| `traefik_cloudflare_email` | "dummy@yummi.com" | add cloudflare mail address |
 | `traefik_config_flags_extra` | {} | Set additional startup params in systemd unit |
 | `traefik_config` | {} | traefik config file entries |
 

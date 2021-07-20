@@ -125,6 +125,15 @@
     - traefik
     - traefik_config
 
+- name: copy defined custom rules *.rule from files folder
+  copy:
+    src: "{{ item }}"
+    dest: "{{ traefik_config_dir }}/rules/"
+    owner: "root"
+    mode: 0600
+  with_fileglob: "*.yml"
+  become: true
+
 - name: create systemd service unit
   template:
     src: traefik.service.j2
