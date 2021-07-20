@@ -32,7 +32,7 @@ All variables which can be overridden are stored in [defaults/main.yml](defaults
 | `traefik_system_user` | traefik | Traefik system user |
 | `traefik_system_group` | traefik | Traefik system group |
 | `traefik_limit_nofile` | 8192 | nofile limit in systemd unit |
-| `traefik_log_to_file` | 8192 | create logfiles in `traefik_log_dir` |
+| `traefik_log_to_file` | true | create logfiles in `traefik_log_dir` |
 | `traefik_log_level` | warn | Set loglevel |
 | `traefik_log_format` | json | Set logformat |
 | `traefik_config_flags_extra` | {} | Set additional startup params in systemd unit |
