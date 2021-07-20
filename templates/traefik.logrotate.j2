@@ -1,0 +1,13 @@
+{{ traefik_log_dir }}/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    create 0640 {{ traefik_system_user }} {{ traefik_system_group }}
+    missingok
+    dateext
+    dateformat _%Y%m%d
+    postrotate
+      kill -USR1 `pgrep traefik`
+    endscript
+}

@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  role_name: traefik
+  author: Dominik Lenhardt
+  description: Installing and configure Traefik Webserver
+  license: "MIT"
+  min_ansible_version: 2.5
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+        - groovy
+        - hirsute
+  galaxy_tags:
+  - system
+  - network
+  - linux
+  - monitoring
+  - traefik
+dependencies: []

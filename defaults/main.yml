@@ -1,0 +1,22 @@
+---
+proxy_env: {}
+traefik_version: 2.4.11
+traefik_config_dir: /etc/traefik
+traefik_log_dir: /var/log/traefik
+traefik_binary_install_dir: /usr/local/bin
+traefik_system_user: "{{ traefik_user | default('traefik') }}"
+traefik_system_group: "{{ traefik_group | default('traefik') }}"
+traefik_log_to_file: true
+traefik_log_level: warn
+traefik_log_format: json
+traefik_limit_nofile: 8192
+traefik_config_flags_extra: {}
+traefik_config:
+  global:
+    checkNewVersion: true
+    sendAnonymousUsage: true
+    entryPoints:
+      web:
+        address: :80
+      websecure:
+        address: :443

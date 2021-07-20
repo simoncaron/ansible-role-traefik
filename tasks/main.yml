@@ -1,0 +1,145 @@
+---
+- name: create system group
+  group:
+    name: "{{ traefik_system_group }}"
+    system: true
+    state: present
+  when: traefik_system_group != "root"
+  become: true
+  tags: traefik
+
+- name: create system user
+  user:
+    name: "{{ traefik_system_user }}"
+    system: true
+    shell: "/sbin/nologin"
+    group: "{{ traefik_system_group }}"
+    createhome: false
+  when: traefik_system_user != "root"
+  become: true
+  tags: traefik
+
+- name: create configuration and data directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ traefik_system_user }}"
+    group: "{{ traefik_system_group }}"
+    mode: 0755
+  with_items:
+    - "{{ traefik_config_dir }}"
+    - "{{ traefik_config_dir }}/rules"
+  become: true
+  tags: traefik
+
+- name: create log directorie
+  file:
+    path: "{{ traefik_log_dir }}"
+    state: directory
+    owner: "{{ traefik_system_user }}"
+    group: "{{ traefik_system_group }}"
+    mode: 0755
+  when: traefik_log_to_file
+  become: true
+  tags: traefik
+
+- name: copy logrotate rule
+  template:
+    src: "traefik.logrotate.j2"
+    dest: "/etc/logrotate.d/traefik"
+    owner: "root"
+    group: "root"
+    mode: 0644
+  when: traefik_log_to_file
+  tags:
+    - traefik
+    - alertrules
+
+- name: check if traefik is installed
+  stat:
+    path: "{{ traefik_binary_install_dir }}/traefik"
+  register: __traefik_is_installed
+  become: true
+  tags: traefik
+
+- name: gather currently installed traefik version (if any)
+  command: "{{ traefik_binary_install_dir }}/traefik version"
+  args:
+    warn: false
+  changed_when: false
+  register: __traefik_current_version_output
+  when: __traefik_is_installed.stat.exists
+  become: true
+  tags: traefik
+
+- name: download binary to local folder
+  get_url:
+    url: "https://github.com/traefik/traefik/releases/download/v{{ traefik_version }}/traefik_v{{ traefik_version }}_linux_{{ go_arch }}.tar.gz"
+    dest: "/tmp/traefik-{{ traefik_version }}.linux-{{ go_arch }}.tar.gz"
+  environment: "{{ proxy_env }}"
+  register: _download_archive
+  until: _download_archive is succeeded
+  retries: 5
+  delay: 2
+  # run_once: true # <-- this cannot be set due to multi-arch support
+  delegate_to: localhost
+  check_mode: false
+  become: true
+  tags: traefik
+  when: (not __traefik_is_installed.stat.exists) or (__traefik_current_version_output.stdout_lines[0].split(" ")[1] != traefik_version)
+
+- name: unpack binaries
+  unarchive:
+    src: "/tmp/traefik-{{ traefik_version }}.linux-{{ go_arch }}.tar.gz"
+    dest: "/tmp"
+    creates: "/tmp/traefik-{{ traefik_version }}.linux-{{ go_arch }}/traefik"
+  delegate_to: localhost
+  check_mode: false
+  become: true
+  tags: traefik
+  when: (not __traefik_is_installed.stat.exists) or (__traefik_current_version_output.stdout_lines[0].split(" ")[1] != traefik_version)
+  
+- name: propagate binaries
+  copy:
+    src: "/tmp/traefik-{{ traefik_version }}.linux-{{ go_arch }}/traefik"
+    dest: "{{ traefik_binary_install_dir }}/traefik"
+    mode: 0755
+    owner: root
+    group: root
+  notify: restart traefik
+  become: true
+  tags: traefik
+  when: (not __traefik_is_installed.stat.exists) or (__traefik_current_version_output.stdout_lines[0].split(" ")[1] != traefik_version)
+
+- name: configure
+  template:
+    src: "traefik.yml.j2"
+    dest: "{{ traefik_config_dir }}/config.yml"
+    force: true
+    owner: "{{ traefik_system_user }}"
+    group: "{{ traefik_system_group }}"
+    mode: 0644
+  notify: reload traefik
+  become: true
+  tags: 
+    - traefik
+    - traefik_config
+
+- name: create systemd service unit
+  template:
+    src: traefik.service.j2
+    dest: /etc/systemd/system/traefik.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart traefik
+  become: true
+  tags: traefik
+
+- name: ensure service is started and enabled
+  systemd:
+    name: traefik
+    state: reloaded
+    enabled: yes
+  become: true
+  tags: traefik
