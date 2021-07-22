@@ -9,8 +9,11 @@ After=network-online.target
 {%   if traefik_cloudflare_email | length > 0 %}
 Environment="CF_API_EMAIL={{ traefik_cloudflare_email }}"
 {%   endif %}
-{%   if traefik_cloudflare_email | length > 0 %}
+{%   if traefik_cloudflare_api_key | length > 0 %}
 Environment="CF_API_KEY={{ traefik_cloudflare_api_key }}"
+{%   endif %}
+{%   if traefik_cloudflare_zone_api_token | length > 0 %}
+Environment="CF_API_KEY={{ traefik_cloudflare_zone_api_token }}"
 {%   endif %}
 {% endif %}
 Type=simple

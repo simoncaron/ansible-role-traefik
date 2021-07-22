@@ -42,6 +42,7 @@ All variables which can be overridden are stored in [defaults/main.yml](defaults
 | `traefik_cloudflare_enable` | false | enable cloudflare dns challange |
 | `traefik_cloudflare_email` | "dummy@yummi.com" | cloudflare email |
 | `traefik_cloudflare_api_key` | "dummy" | cloudflare api key |
+| `traefik_cloudflare_zone_api_token` | "dummy" | cloudflare zone api token |
 
 ## Example
 
@@ -56,23 +57,39 @@ traefik_config:
       websecure:
         address: :443
 traefik_rules_config:
-  - name: unifi
-    content:
-      tcp:
-        routers:
-          unifi-rtr:
-            rule: "HostSNI(`unifi.{{ ansible_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
-            entryPoints:
-              - https
-            service: unifi-svc
-            tls:
-              certResolver: dns-cloudflare
-              passthrough: true
-        services:
-          unifi-svc:
-            loadBalancer:
-              servers:
-                - address: "192.168.1.2:8443"
+- name: unifi
+  content:
+    http:
+      routers:
+        unifi-rtr:
+          rule: "Host(`unifi.{{ traefik_default_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
+          entryPoints:
+            - https
+          service: unifi-svc
+          tls:
+            certResolver: dns-cloudflare
+      services:
+        unifi-svc:
+          loadBalancer:
+            servers:
+              - url: "https://192.168.1.2:8443" # or whatever your external host's IP:port is
+- name: adguard
+  content:
+    http:
+      routers:
+        adguard-rtr:
+          rule: "Host(`adguard.{{ traefik_default_domain }}`)"  # will only work with cloudflare Full SSL (not Strict)
+          entryPoints:
+            - https
+          service: adguard-svc
+          tls:
+            certResolver: dns-cloudflare
+    #        passthrough: true
+      services:
+        adguard-svc:
+          loadBalancer:
+            servers:
+              - url: "http://192.168.1.2:3000" # or whatever your external host's IP:port is
 ```
 
 ## Playbook
@@ -93,40 +110,39 @@ traefik_rules_config:
           websecure:
             address: :443
     traefik_rules_config:
-      - name: unifi
-        content:
-          tcp:
-            routers:
-              unifi-rtr:
-                rule: "HostSNI(`unifi.{{ ansible_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
-                entryPoints:
-                  - https
-                service: unifi-svc
-                tls:
-                  certResolver: dns-cloudflare
-                  passthrough: true
-            services:
-              unifi-svc:
-                loadBalancer:
-                  servers:
-                    - address: "192.168.1.2:8443" # or whatever your external host's IP:port is
-      - name: adguard
-        content:
-          http:
-            routers:
-              adguard2-rtr:
-                rule: "HostHeader(`adguard.{{ ansible_domain }}`)"  # will only work with cloudflare Full SSL (not Strict)
-                entryPoints:
-                  - https
-                service: adguard2-svc
-                tls:
-                  certResolver: dns-cloudflare
-          #        passthrough: true
-            services:
-              adguard2-svc:
-                loadBalancer:
-                  servers:
-                    - url: "http://192.168.1.2:3000" # or whatever your external host's IP:port is
+    - name: unifi
+      content:
+        http:
+          routers:
+            unifi-rtr:
+              rule: "Host(`unifi.{{ traefik_default_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
+              entryPoints:
+                - https
+              service: unifi-svc
+              tls:
+                certResolver: dns-cloudflare
+          services:
+            unifi-svc:
+              loadBalancer:
+                servers:
+                  - url: "https://192.168.1.2:8443" # or whatever your external host's IP:port is
+    - name: adguard
+      content:
+        http:
+          routers:
+            adguard-rtr:
+              rule: "Host(`adguard.{{ traefik_default_domain }}`)"  # will only work with cloudflare Full SSL (not Strict)
+              entryPoints:
+                - https
+              service: adguard-svc
+              tls:
+                certResolver: dns-cloudflare
+        #        passthrough: true
+          services:
+            adguard-svc:
+              loadBalancer:
+                servers:
+                  - url: "http://192.168.1.2:3000" # or whatever your external host's IP:port is
 ```
 
 ## Contributing

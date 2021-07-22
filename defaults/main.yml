@@ -11,6 +11,7 @@ traefik_default_domain: "{{ ansible_domain }}"
 traefik_cloudflare_enable: false
 traefik_cloudflare_email: "dummy@yummi.com"
 traefik_cloudflare_api_key: "dummy"
+traefik_cloudflare_zone_api_token: "dummy"
 # Add additional systemd startup params
 traefik_config_flags_extra: {}
 # Traefik main config file
@@ -36,27 +37,20 @@ traefik_config:
       retryAttempts: true
       minDuration: 42
   entryPoints:
-    web:
-      address: ":80"
-    websecure:
-      address: ":443"
-      forwardedHeaders:
-        trustedIPs: "173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/12,172.64.0.0/13,131.0.72.0/22"
     traefik:
       address: ":8080"
     metrics:
       address: ":8082"
+    http:
+      address: ":80"
     https:
-      http:
-        tls:
-          certresolver: "dns-cloudflare"
-          domains:
-            name: "{{ traefik_default_domain }}"
-            sans: "*.{{ traefik_default_domain }}"
+      address: ":443"
+      forwardedHeaders:
+        trustedIPs: "173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/12,172.64.0.0/13,131.0.72.0/22"
   metrics:
     prometheus:
-      #addEntryPointsLabels: true
-      #addServicesLabels: true
+      addEntryPointsLabels: true
+      addServicesLabels: true
       entryPoint: "metrics"
   providers:
     file:
@@ -74,29 +68,37 @@ traefik_config:
           delayBeforeCheck: 90
 # Traefik rules config files with two exmaples
 traefik_rules_config:
+  - name: dashboard
+    content:
+      http:
+        routers:
+          dashboard:
+            rule: Host(`traefik.{{ traefik_default_domain }}`)
+            service: api@internal # This is the defined name for api. You cannot change it.
+            tls:
+              certresolver: dns-cloudflare
   - name: unifi
     content:
-      tcp:
+      http:
         routers:
           unifi-rtr:
-            rule: "HostSNI(`unifi.{{ traefik_default_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
+            rule: "Host(`unifi.{{ traefik_default_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
             entryPoints:
               - https
             service: unifi-svc
             tls:
               certResolver: dns-cloudflare
-              passthrough: true
         services:
           unifi-svc:
             loadBalancer:
               servers:
-                - address: "192.168.1.2:8443" # or whatever your external host's IP:port is
+                - url: "https://192.168.1.2:8443" # or whatever your external host's IP:port is
   - name: adguard
     content:
       http:
         routers:
           adguard-rtr:
-            rule: "HostHeader(`adguard.{{ traefik_default_domain }}`)"  # will only work with cloudflare Full SSL (not Strict)
+            rule: "Host(`adguard.{{ traefik_default_domain }}`)"  # will only work with cloudflare Full SSL (not Strict)
             entryPoints:
               - https
             service: adguard-svc
