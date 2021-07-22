@@ -6,15 +6,14 @@ traefik_log_dir: /var/log/traefik
 traefik_binary_install_dir: /usr/local/bin
 traefik_system_user: "{{ traefik_user | default('traefik') }}"
 traefik_system_group: "{{ traefik_group | default('traefik') }}"
-traefik_log_to_file: true
-traefik_log_level: warn
-traefik_log_format: json
 traefik_limit_nofile: 8192
 traefik_default_domain: "{{ ansible_domain }}"
 traefik_cloudflare_enable: false
 traefik_cloudflare_email: "dummy@yummi.com"
 traefik_cloudflare_api_key: "dummy"
+# Add additional systemd startup params
 traefik_config_flags_extra: {}
+# Traefik main config file
 traefik_config:
   global:
     checkNewVersion: true
@@ -24,6 +23,18 @@ traefik_config:
   api:
     insecure: true
     dashboard: true
+#  log:
+#    level: info
+#    filePath: /var/log/traefik/traefik.log
+#    format: json
+  accessLog:
+    filePath: /var/log/traefik/access.log
+    format: json
+    filters:
+      statusCodes:
+      - 200-504
+      retryAttempts: true
+      minDuration: 42
   entryPoints:
     web:
       address: ":80"
@@ -62,3 +73,39 @@ traefik_config:
           provider: "cloudflare"
           resolvers: "1.1.1.1:53,1.0.0.1:53"
           delayBeforeCheck: 90
+# Traefik rules config files with two exmaples
+traefik_rules_config:
+  - name: unifi
+    content:
+      http:
+        routers:
+          unifi-rtr:
+            rule: "HostSNI(`unifi.{{ ansible_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
+            entryPoints:
+              - https
+            service: unifi-svc
+            tls:
+              certResolver: dns-cloudflare
+              passthrough: true
+        services:
+          unifi-svc:
+            loadBalancer:
+              servers:
+                - address: "https://192.168.1.2:8443" # or whatever your external host's IP:port is
+  - name: adguard
+    content:
+      http:
+        routers:
+          adguard-rtr:
+            rule: "HostHeader(`adguard.{{ ansible_domain }}`)"  # will only work with cloudflare Full SSL (not Strict)
+            entryPoints:
+              - https
+            service: adguard-svc
+            tls:
+              certResolver: dns-cloudflare
+      #        passthrough: true
+        services:
+          adguard-svc:
+            loadBalancer:
+              servers:
+                - url: "http://192.168.1.2:3000" # or whatever your external host's IP:port is

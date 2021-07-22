@@ -120,29 +120,32 @@
   tags: traefik
   when: (not __traefik_is_installed.stat.exists) or (__traefik_current_version_output.stdout_lines[0].split(" ")[1] != traefik_version)
 
-- name: configure
-  template:
-    src: "config.yml.j2"
-    dest: "{{ traefik_config_dir }}/config.yml"
-    force: true
+- name: generate config file
+  copy:
+    content: "{{ traefik_config | to_nice_yaml(indent=2, sort_keys=False) }}\n"
+    dest: "{{ traefik_config_dir }}//config.yml"
     owner: "{{ traefik_system_user }}"
     group: "{{ traefik_system_group }}"
     mode: 0644
   notify: reload traefik
   become: true
-  tags: 
+  tags:
     - traefik
     - traefik_config
 
-- name: touch acme.json file
-  file:
-    path: "{{ traefik_config_dir }}/acme/acme.json"
-    state: touch
+- name: generate rules config files
+  copy:
+    content: "{{ item.content | to_nice_yaml(indent=2, sort_keys=False) }}\n"
+    dest: "{{ traefik_config_dir }}//rules/{{ item.name }}.yml"
     owner: "{{ traefik_system_user }}"
     group: "{{ traefik_system_group }}"
-    mode: 0600
+    mode: 0644
+  with_items: "{{ traefik_rules_config }}"
+  notify: reload traefik
   become: true
-  tags: traefik
+  tags:
+    - traefik
+    - traefik_config
 
 - name: copy defined custom rules *.rule from files folder
   copy:
@@ -151,7 +154,27 @@
     owner: "root"
     mode: 0644
   with_fileglob: "*.yml"
+  notify: reload traefik
   become: true
+  tags:
+    - traefik
+    - traefik_config
+
+- name: check if acme.json exists
+  stat:
+    path: "{{ traefik_config_dir }}/acme/acme.json"
+  register: __acme_json_exists
+
+- name: touch acme.json if not exists
+  file:
+    path: "{{ traefik_config_dir }}/acme/acme.json"
+    state: touch
+    owner: "{{ traefik_system_user }}"
+    group: "{{ traefik_system_group }}"
+    mode: 0600
+  when: not __acme_json_exists
+  become: true
+  tags: traefik
 
 - name: create systemd service unit
   template:
