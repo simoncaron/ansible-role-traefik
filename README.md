@@ -52,9 +52,9 @@ traefik_config:
     checkNewVersion: true
     sendAnonymousUsage: true
     entryPoints:
-      web:
+      http:
         address: :80
-      websecure:
+      https:
         address: :443
 traefik_rules_config:
 # Traefik rules config files with two exmaples
@@ -80,7 +80,7 @@ traefik_rules_config:
             middlewares:
               - rate-limit
               - secure-headers
-              - https_redirect
+              - https-redirect
             tls:
               certResolver: dns-cloudflare
         services:
@@ -100,7 +100,7 @@ traefik_rules_config:
             middlewares:
               - rate-limit
               - secure-headers
-              - https_redirect
+              - https-redirect
             tls:
               certResolver: dns-cloudflare
       #        passthrough: true
@@ -109,6 +109,7 @@ traefik_rules_config:
             loadBalancer:
               servers:
                 - url: "http://192.168.1.2:3000" # or whatever your external host's IP:port is
+                  scheme: https
 ```
 
 ## Playbook
@@ -124,9 +125,9 @@ traefik_rules_config:
         checkNewVersion: true
         sendAnonymousUsage: true
         entryPoints:
-          web:
+          http:
             address: :80
-          websecure:
+          https:
             address: :443
     traefik_rules_config:
     # Traefik rules config files with two exmaples
@@ -152,7 +153,7 @@ traefik_rules_config:
                 middlewares:
                   - rate-limit
                   - secure-headers
-                  - https_redirect
+                  - https-redirect
                 tls:
                   certResolver: dns-cloudflare
             services:
@@ -160,6 +161,7 @@ traefik_rules_config:
                 loadBalancer:
                   servers:
                     - url: "https://192.168.1.2:8443" # or whatever your external host's IP:port is
+                      scheme: https
       - name: adguard
         content:
           http:
@@ -172,10 +174,9 @@ traefik_rules_config:
                 middlewares:
                   - rate-limit
                   - secure-headers
-                  - https_redirect
+                  - https-redirect
                 tls:
                   certResolver: dns-cloudflare
-          #        passthrough: true
             services:
               adguard-svc:
                 loadBalancer:

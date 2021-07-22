@@ -1,6 +1,6 @@
 http:
   middlewares:
-    https_redirect:
+    https-redirect:
       redirectScheme:
         scheme: https
         permanent: true
@@ -41,4 +41,4 @@ http:
         middlewares:
           - rate-limit
           - secure-headers
-          - https_redirect
+          - https-redirect

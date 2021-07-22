@@ -89,7 +89,7 @@ traefik_rules_config:
             middlewares:
               - rate-limit
               - secure-headers
-              - https_redirect
+              - https-redirect
             tls:
               certResolver: dns-cloudflare
         services:
@@ -97,6 +97,7 @@ traefik_rules_config:
             loadBalancer:
               servers:
                 - url: "https://192.168.1.2:8443" # or whatever your external host's IP:port is
+                  scheme: https
   - name: adguard
     content:
       http:
@@ -109,10 +110,9 @@ traefik_rules_config:
             middlewares:
               - rate-limit
               - secure-headers
-              - https_redirect
+              - https-redirect
             tls:
               certResolver: dns-cloudflare
-      #        passthrough: true
         services:
           adguard-svc:
             loadBalancer:
