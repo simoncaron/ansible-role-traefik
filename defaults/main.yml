@@ -86,6 +86,10 @@ traefik_rules_config:
             entryPoints:
               - https
             service: unifi-svc
+            middlewares:
+              - rate-limit
+              - secure-headers
+              - https_redirect
             tls:
               certResolver: dns-cloudflare
         services:
@@ -102,6 +106,10 @@ traefik_rules_config:
             entryPoints:
               - https
             service: adguard-svc
+            middlewares:
+              - rate-limit
+              - secure-headers
+              - https_redirect
             tls:
               certResolver: dns-cloudflare
       #        passthrough: true

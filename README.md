@@ -57,39 +57,58 @@ traefik_config:
       websecure:
         address: :443
 traefik_rules_config:
-- name: unifi
-  content:
-    http:
-      routers:
-        unifi-rtr:
-          rule: "Host(`unifi.{{ traefik_default_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
-          entryPoints:
-            - https
-          service: unifi-svc
-          tls:
-            certResolver: dns-cloudflare
-      services:
-        unifi-svc:
-          loadBalancer:
-            servers:
-              - url: "https://192.168.1.2:8443" # or whatever your external host's IP:port is
-- name: adguard
-  content:
-    http:
-      routers:
-        adguard-rtr:
-          rule: "Host(`adguard.{{ traefik_default_domain }}`)"  # will only work with cloudflare Full SSL (not Strict)
-          entryPoints:
-            - https
-          service: adguard-svc
-          tls:
-            certResolver: dns-cloudflare
-    #        passthrough: true
-      services:
-        adguard-svc:
-          loadBalancer:
-            servers:
-              - url: "http://192.168.1.2:3000" # or whatever your external host's IP:port is
+# Traefik rules config files with two exmaples
+traefik_rules_config:
+  - name: dashboard
+    content:
+      http:
+        routers:
+          dashboard:
+            rule: Host(`traefik.{{ traefik_default_domain }}`)
+            service: api@internal # This is the defined name for api. You cannot change it.
+            tls:
+              certresolver: dns-cloudflare
+  - name: unifi
+    content:
+      http:
+        routers:
+          unifi-rtr:
+            rule: "Host(`unifi.{{ traefik_default_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
+            entryPoints:
+              - https
+            service: unifi-svc
+            middlewares:
+              - rate-limit
+              - secure-headers
+              - https_redirect
+            tls:
+              certResolver: dns-cloudflare
+        services:
+          unifi-svc:
+            loadBalancer:
+              servers:
+                - url: "https://192.168.1.2:8443" # or whatever your external host's IP:port is
+  - name: adguard
+    content:
+      http:
+        routers:
+          adguard-rtr:
+            rule: "Host(`adguard.{{ traefik_default_domain }}`)"  # will only work with cloudflare Full SSL (not Strict)
+            entryPoints:
+              - https
+            service: adguard-svc
+            middlewares:
+              - rate-limit
+              - secure-headers
+              - https_redirect
+            tls:
+              certResolver: dns-cloudflare
+      #        passthrough: true
+        services:
+          adguard-svc:
+            loadBalancer:
+              servers:
+                - url: "http://192.168.1.2:3000" # or whatever your external host's IP:port is
 ```
 
 ## Playbook
@@ -110,39 +129,58 @@ traefik_rules_config:
           websecure:
             address: :443
     traefik_rules_config:
-    - name: unifi
-      content:
-        http:
-          routers:
-            unifi-rtr:
-              rule: "Host(`unifi.{{ traefik_default_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
-              entryPoints:
-                - https
-              service: unifi-svc
-              tls:
-                certResolver: dns-cloudflare
-          services:
-            unifi-svc:
-              loadBalancer:
-                servers:
-                  - url: "https://192.168.1.2:8443" # or whatever your external host's IP:port is
-    - name: adguard
-      content:
-        http:
-          routers:
-            adguard-rtr:
-              rule: "Host(`adguard.{{ traefik_default_domain }}`)"  # will only work with cloudflare Full SSL (not Strict)
-              entryPoints:
-                - https
-              service: adguard-svc
-              tls:
-                certResolver: dns-cloudflare
-        #        passthrough: true
-          services:
-            adguard-svc:
-              loadBalancer:
-                servers:
-                  - url: "http://192.168.1.2:3000" # or whatever your external host's IP:port is
+    # Traefik rules config files with two exmaples
+    traefik_rules_config:
+      - name: dashboard
+        content:
+          http:
+            routers:
+              dashboard:
+                rule: Host(`traefik.{{ traefik_default_domain }}`)
+                service: api@internal # This is the defined name for api. You cannot change it.
+                tls:
+                  certresolver: dns-cloudflare
+      - name: unifi
+        content:
+          http:
+            routers:
+              unifi-rtr:
+                rule: "Host(`unifi.{{ traefik_default_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
+                entryPoints:
+                  - https
+                service: unifi-svc
+                middlewares:
+                  - rate-limit
+                  - secure-headers
+                  - https_redirect
+                tls:
+                  certResolver: dns-cloudflare
+            services:
+              unifi-svc:
+                loadBalancer:
+                  servers:
+                    - url: "https://192.168.1.2:8443" # or whatever your external host's IP:port is
+      - name: adguard
+        content:
+          http:
+            routers:
+              adguard-rtr:
+                rule: "Host(`adguard.{{ traefik_default_domain }}`)"  # will only work with cloudflare Full SSL (not Strict)
+                entryPoints:
+                  - https
+                service: adguard-svc
+                middlewares:
+                  - rate-limit
+                  - secure-headers
+                  - https_redirect
+                tls:
+                  certResolver: dns-cloudflare
+          #        passthrough: true
+            services:
+              adguard-svc:
+                loadBalancer:
+                  servers:
+                    - url: "http://192.168.1.2:3000" # or whatever your external host's IP:port is
 ```
 
 ## Contributing
