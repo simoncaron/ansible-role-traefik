@@ -95,7 +95,7 @@ traefik_rules_config:
     traefik_rules_config:
       - name: unifi
         content:
-          http:
+          tcp:
             routers:
               unifi-rtr:
                 rule: "HostSNI(`unifi.{{ ansible_domain }}`)" # will only work with cloudflare Full SSL (not Strict)
@@ -109,7 +109,7 @@ traefik_rules_config:
               unifi-svc:
                 loadBalancer:
                   servers:
-                    - address: "https://192.168.1.2:8443" # or whatever your external host's IP:port is
+                    - address: "192.168.1.2:8443" # or whatever your external host's IP:port is
       - name: adguard
         content:
           http:
