@@ -151,7 +151,8 @@
   copy:
     src: "{{ item }}"
     dest: "{{ traefik_config_dir }}/rules/"
-    owner: "root"
+    owner: "{{ traefik_system_user }}"
+    group: "{{ traefik_system_group }}"
     mode: 0644
   with_fileglob: "*.yml"
   notify: reload traefik
