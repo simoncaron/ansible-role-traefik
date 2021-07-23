@@ -29,6 +29,7 @@
   with_items:
     - "{{ traefik_config_dir }}"
     - "{{ traefik_config_dir }}/rules"
+    - "/var/log/traefik"
   become: true
   tags: traefik
 
@@ -42,17 +43,6 @@
   become: true
   tags: traefik
 
-- name: create log directorie
-  file:
-    path: "{{ traefik_log_dir }}"
-    state: directory
-    owner: "{{ traefik_system_user }}"
-    group: "{{ traefik_system_group }}"
-    mode: 0755
-  when: traefik_log_to_file
-  become: true
-  tags: traefik
-
 - name: copy logrotate rule
   template:
     src: "traefik.logrotate.j2"
@@ -60,7 +50,6 @@
     owner: "root"
     group: "root"
     mode: 0644
-  when: traefik_log_to_file
   tags:
     - traefik
     - alertrules
@@ -141,7 +130,6 @@
     group: "{{ traefik_system_group }}"
     mode: 0644
   with_items: "{{ traefik_rules_config }}"
-  notify: reload traefik
   become: true
   tags:
     - traefik
@@ -155,7 +143,6 @@
     group: "{{ traefik_system_group }}"
     mode: 0644
   with_fileglob: "*.yml"
-  notify: reload traefik
   become: true
   tags:
     - traefik

@@ -13,7 +13,7 @@ Environment="CF_API_EMAIL={{ traefik_cloudflare_email }}"
 Environment="CF_API_KEY={{ traefik_cloudflare_api_key }}"
 {%   endif %}
 {%   if traefik_cloudflare_zone_api_token | length > 0 %}
-Environment="CF_API_KEY={{ traefik_cloudflare_zone_api_token }}"
+Environment="CF_ZONE_API_TOKEN={{ traefik_cloudflare_zone_api_token }}"
 {%   endif %}
 {% endif %}
 Type=simple
