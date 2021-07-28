@@ -152,6 +152,8 @@
   stat:
     path: "{{ traefik_config_dir }}/acme/acme.json"
   register: __acme_json_exists
+  become: true
+  tags: traefik
 
 - name: touch acme.json if not exists
   file:
@@ -160,7 +162,7 @@
     owner: "{{ traefik_system_user }}"
     group: "{{ traefik_system_group }}"
     mode: 0600
-  when: not __acme_json_exists
+  when: (not __acme_json_exists.stat.exists)
   become: true
   tags: traefik
 
