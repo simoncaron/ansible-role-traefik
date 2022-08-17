@@ -1,6 +1,6 @@
 ---
 proxy_env: {}
-traefik_version: 2.8.1
+traefik_version: 2.6.1
 traefik_config_dir: /etc/traefik
 traefik_log_dir: /var/log/traefik
 traefik_binary_install_dir: /usr/local/bin
