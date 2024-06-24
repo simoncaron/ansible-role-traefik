@@ -12,6 +12,8 @@ traefik_cloudflare_enable: false
 traefik_cloudflare_email: "dummy@yummi.com"
 traefik_cloudflare_api_key: "dummy"
 traefik_cloudflare_zone_api_token: "dummy"
+# Add additional systemd environment variables
+traefik_service_extra_env_vars: []
 # Add additional systemd startup params
 traefik_config_flags_extra: {}
 # Traefik main config file
@@ -66,6 +68,8 @@ traefik_config:
           provider: "cloudflare"
           resolvers: "1.1.1.1:53,1.0.0.1:53"
           delayBeforeCheck: 90
+# Copy default rules builtin the role
+traefik_copy_default_rules: true
 # Traefik rules config files with two exmaples
 traefik_rules_config:
   - name: dashboard

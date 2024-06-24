@@ -16,6 +16,9 @@ Environment="CF_API_KEY={{ traefik_cloudflare_api_key }}"
 Environment="CF_ZONE_API_TOKEN={{ traefik_cloudflare_zone_api_token }}"
 {%   endif %}
 {% endif %}
+{% for env_var in traefik_service_extra_env_vars %}
+Environment="{{ env.name }}={{ env.value }}"
+{% endfor %}
 Type=simple
 {% if ansible_facts['distribution'] == "Debian" and ansible_facts['distribution_major_version'] == "8" %}
 User=root
