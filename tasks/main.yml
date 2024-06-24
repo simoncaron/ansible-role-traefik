@@ -63,8 +63,6 @@
 
 - name: gather currently installed traefik version (if any)
   command: "{{ traefik_binary_install_dir }}/traefik version"
-  args:
-    warn: false
   changed_when: false
   register: __traefik_current_version_output
   when: __traefik_is_installed.stat.exists

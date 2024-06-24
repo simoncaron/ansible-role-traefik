@@ -8,10 +8,6 @@ traefik_system_user: "{{ traefik_user | default('traefik') }}"
 traefik_system_group: "{{ traefik_group | default('traefik') }}"
 traefik_limit_nofile: 8192
 traefik_default_domain: "{{ ansible_domain }}"
-traefik_cloudflare_enable: false
-traefik_cloudflare_email: "dummy@yummi.com"
-traefik_cloudflare_api_key: "dummy"
-traefik_cloudflare_zone_api_token: "dummy"
 # Add additional systemd environment variables
 traefik_service_extra_env_vars: []
 # Add additional systemd startup params

@@ -5,19 +5,8 @@ Documentation=https://github.com/traefik
 After=network-online.target
 
 [Service]
-{% if traefik_cloudflare_enable %}
-{%   if traefik_cloudflare_email | length > 0 %}
-Environment="CF_API_EMAIL={{ traefik_cloudflare_email }}"
-{%   endif %}
-{%   if traefik_cloudflare_api_key | length > 0 %}
-Environment="CF_API_KEY={{ traefik_cloudflare_api_key }}"
-{%   endif %}
-{%   if traefik_cloudflare_zone_api_token | length > 0 %}
-Environment="CF_ZONE_API_TOKEN={{ traefik_cloudflare_zone_api_token }}"
-{%   endif %}
-{% endif %}
 {% for env_var in traefik_service_extra_env_vars %}
-Environment="{{ env.name }}={{ env.value }}"
+Environment="{{ env_var.name }}={{ env_var.value }}"
 {% endfor %}
 Type=simple
 {% if ansible_facts['distribution'] == "Debian" and ansible_facts['distribution_major_version'] == "8" %}

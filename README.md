@@ -35,14 +35,9 @@ All variables which can be overridden are stored in [defaults/main.yml](defaults
 | `traefik_system_group` | traefik | Traefik system group |
 | `traefik_limit_nofile` | 8192 | nofile limit in systemd unit |
 | `traefik_default_domain` | "{{ ansible_domain }}" | Set default domain |
-| `traefik_cloudflare_email` | "dummy@yummi.com" | add cloudflare mail address |
 | `traefik_config_flags_extra` | {} | Set additional startup params in systemd unit |
 | `traefik_config` | {} | traefik config file entries |
 | `traefik_rules_config` | [] | traefik custom rules in array - see exmaple |
-| `traefik_cloudflare_enable` | false | enable cloudflare dns challange |
-| `traefik_cloudflare_email` | "dummy@yummi.com" | cloudflare email |
-| `traefik_cloudflare_api_key` | "dummy" | cloudflare api key |
-| `traefik_cloudflare_zone_api_token` | "dummy" | cloudflare zone api token |
 
 ## Example
 
