@@ -1,14 +1,14 @@
 ---
-- name: restart traefik
-  systemd:
+- name: Testart traefik
+  ansible.builtin.systemd:
     daemon_reload: true
     name: traefik
     state: restarted
   become: true
   tags: traefik
 
-- name: reload traefik
-  systemd:
+- name: Reload traefik
+  ansible.builtin.systemd:
     name: traefik
     state: reloaded
   become: true

@@ -1,6 +1,6 @@
 ---
-- name: create system group
-  group:
+- name: Create system group
+  ansible.builtin.group:
     name: "{{ traefik_system_group }}"
     system: true
     state: present
@@ -8,8 +8,8 @@
   become: true
   tags: traefik
 
-- name: create system user
-  user:
+- name: Create system user
+  ansible.builtin.user:
     name: "{{ traefik_system_user }}"
     system: true
     shell: "/sbin/nologin"
@@ -19,8 +19,8 @@
   become: true
   tags: traefik
 
-- name: create configuration and data directories
-  file:
+- name: Create configuration and data directories
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     owner: "{{ traefik_system_user }}"
@@ -33,8 +33,8 @@
   become: true
   tags: traefik
 
-- name: create acme directorie
-  file:
+- name: Create acme directory
+  ansible.builtin.file:
     path: "{{ traefik_config_dir }}/acme"
     state: directory
     owner: "{{ traefik_system_user }}"
@@ -43,8 +43,8 @@
   become: true
   tags: traefik
 
-- name: copy logrotate rule
-  template:
+- name: Copy logrotate rule
+  ansible.builtin.template:
     src: "traefik.logrotate.j2"
     dest: "/etc/logrotate.d/traefik"
     owner: "root"
@@ -54,49 +54,47 @@
     - traefik
     - alertrules
 
-- name: check if traefik is installed
-  stat:
+- name: Check if traefik is installed
+  ansible.builtin.stat:
     path: "{{ traefik_binary_install_dir }}/traefik"
   register: __traefik_is_installed
   become: true
   tags: traefik
 
-- name: gather currently installed traefik version (if any)
-  command: "{{ traefik_binary_install_dir }}/traefik version"
+- name: Gather currently installed traefik version (if any)
+  ansible.builtin.command: "{{ traefik_binary_install_dir }}/traefik version"
   changed_when: false
   register: __traefik_current_version_output
   when: __traefik_is_installed.stat.exists
   become: true
   tags: traefik
 
-- name: download binary to local folder
-  get_url:
+- name: Download binary to local folder
+  ansible.builtin.get_url:
     url: "https://github.com/traefik/traefik/releases/download/v{{ traefik_version }}/traefik_v{{ traefik_version }}_linux_{{ go_arch }}.tar.gz"
     dest: "/tmp/traefik-{{ traefik_version }}.linux-{{ go_arch }}.tar.gz"
+    mode: "0644"
   environment: "{{ proxy_env }}"
   register: _download_archive
   until: _download_archive is succeeded
   retries: 5
   delay: 2
-  # run_once: true # <-- this cannot be set due to multi-arch support
-  delegate_to: localhost
   check_mode: false
   become: true
   tags: traefik
   when: (not __traefik_is_installed.stat.exists) or (__traefik_current_version_output.stdout_lines[0].split(" ")[1] != traefik_version)
 
-- name: unpack binaries
-  unarchive:
+- name: Unpack binaries
+  ansible.builtin.unarchive:
     src: "/tmp/traefik-{{ traefik_version }}.linux-{{ go_arch }}.tar.gz"
     dest: "/tmp"
-  delegate_to: localhost
   check_mode: false
   become: true
   tags: traefik
   when: (not __traefik_is_installed.stat.exists) or (__traefik_current_version_output.stdout_lines[0].split(" ")[1] != traefik_version)
   
-- name: propagate binaries
-  copy:
+- name: Propagate binaries
+  ansible.builtin.copy:
     src: "/tmp/traefik"
     dest: "{{ traefik_binary_install_dir }}/traefik"
     mode: 0755
@@ -107,8 +105,8 @@
   tags: traefik
   when: (not __traefik_is_installed.stat.exists) or (__traefik_current_version_output.stdout_lines[0].split(" ")[1] != traefik_version)
 
-- name: generate config file
-  copy:
+- name: Generate config file
+  ansible.builtin.copy:
     content: "{{ traefik_config | to_nice_yaml(indent=2, sort_keys=False) }}\n"
     dest: "{{ traefik_config_dir }}//config.yml"
     owner: "{{ traefik_system_user }}"
@@ -120,8 +118,8 @@
     - traefik
     - traefik_config
 
-- name: generate rules config files
-  copy:
+- name: Generate rules config files
+  ansible.builtin.copy:
     content: "{{ item.content | to_nice_yaml(indent=2, sort_keys=False) }}\n"
     dest: "{{ traefik_config_dir }}//rules/{{ item.name }}.yml"
     owner: "{{ traefik_system_user }}"
@@ -133,8 +131,8 @@
     - traefik
     - traefik_config
 
-- name: copy defined custom rules *.rule from files folder
-  copy:
+- name: Copy defined custom rules *.rule from files folder
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "{{ traefik_config_dir }}/rules/"
     owner: "{{ traefik_system_user }}"
@@ -147,15 +145,15 @@
     - traefik
     - traefik_config
 
-- name: check if acme.json exists
-  stat:
+- name: Check if acme.json exists
+  ansible.builtin.stat:
     path: "{{ traefik_config_dir }}/acme/acme.json"
   register: __acme_json_exists
   become: true
   tags: traefik
 
-- name: touch acme.json if not exists
-  file:
+- name: Touch acme.json if not exists
+  ansible.builtin.file:
     path: "{{ traefik_config_dir }}/acme/acme.json"
     state: touch
     owner: "{{ traefik_system_user }}"
@@ -165,8 +163,8 @@
   become: true
   tags: traefik
 
-- name: create systemd service unit
-  template:
+- name: Create systemd service unit
+  ansible.builtin.template:
     src: traefik.service.j2
     dest: /etc/systemd/system/traefik.service
     owner: root
@@ -176,8 +174,8 @@
   become: true
   tags: traefik
 
-- name: ensure service is started and enabled
-  systemd:
+- name: Ensure service is started and enabled
+  ansible.builtin.systemd:
     name: traefik
     state: reloaded
     enabled: yes
