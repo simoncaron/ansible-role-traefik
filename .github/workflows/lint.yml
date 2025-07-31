@@ -1,14 +1,30 @@
-name: ansible-lint
-
-on: [push, pull_request]
+---
+name: Ansible Lint
+'on':
+  pull_request:
+  push:
+    branches:
+      - master
 
 jobs:
-  build:
+
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-    name: ansible-lint
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v2
-      - run: pip install ansible ansible-lint
-      - run: ansible-lint --version
-      - run: ansible-lint .
+      - name: Check out the codebase.
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.7.
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies.
+        run: pip3 install yamllint ansible-lint ansible
+
+      - name: Run yamllint.
+        run: yamllint .
+
+      - name: Run ansible-lint.
+        run: ansible-lint
