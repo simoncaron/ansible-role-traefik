@@ -100,7 +100,7 @@
     mode: 0755
     owner: root
     group: root
-  notify: restart traefik
+  notify: Restart traefik
   become: true
   tags: traefik
   when: (not __traefik_is_installed.stat.exists) or (__traefik_current_version_output.stdout_lines[0].split(" ")[1] != traefik_version)
@@ -112,7 +112,7 @@
     owner: "{{ traefik_system_user }}"
     group: "{{ traefik_system_group }}"
     mode: 0644
-  notify: reload traefik
+  notify: Reload traefik
   become: true
   tags:
     - traefik
@@ -170,7 +170,7 @@
     owner: root
     group: root
     mode: 0644
-  notify: restart traefik
+  notify: Restart traefik
   become: true
   tags: traefik
 
