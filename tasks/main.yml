@@ -88,6 +88,7 @@
   ansible.builtin.unarchive:
     src: "/tmp/traefik-{{ traefik_version }}.linux-{{ go_arch }}.tar.gz"
     dest: "/tmp"
+    remote_src: true
   check_mode: false
   become: true
   tags: traefik
@@ -100,6 +101,7 @@
     mode: 0755
     owner: root
     group: root
+    remote_src: true
   notify: Restart traefik
   become: true
   tags: traefik
